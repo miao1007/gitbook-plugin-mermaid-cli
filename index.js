@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const Q = require('q');
 
 const binPath = path.join(__dirname, "../.bin/mmdc");
+
 function _string2svgSync(mmdString) {
     const deferred = Q.defer();
     const filename = 'foo' + crypto.randomBytes(4).readUInt32LE(0) + 'bar';
@@ -45,6 +46,21 @@ module.exports = {
                     body = readFileSync(absoluteSrcPath, 'utf8')
                 }
                 return _string2svgSync(body);
+            }
+        },
+        hooks: {
+            // from gitbook-plugin-mermaid-gb3
+            'page:before': async function processMermaidBlockList(page) {
+                const mermaidRegex = /^```mermaid((.*[\r\n]+)+?)?```$/im;
+                var match;
+                while ((match = mermaidRegex.exec(page.content))) {
+                    var rawBlock = match[0];
+                    var mermaidContent = match[1];
+                    var processed = _string2svgSync(mermaidContent);
+                    await processed;
+                    page.content = page.content.replace(rawBlock, processed);
+                }
+                return page;
             }
         }
     }

@@ -1,11 +1,11 @@
-Pipe wrapper for mermaid.cli.
+String based pipeline wrapper for mermaid.cli.
 
 ## Features
-* Based on mermaid.cli, generate svg at compile time, with inline css, which saves page's loading time
+* Based on mermaid.cli/puppeteer, generate svg at compile time, with inline css, which saves page's loading time
 * No external css/js required.
 * Same usage API like gitbook-plugin-mermaid
 
-## install
+## Install
 
 in the book.json:
 
