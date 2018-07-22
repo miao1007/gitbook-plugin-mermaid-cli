@@ -50,7 +50,7 @@ module.exports = {
         }
     }, hooks: {
         // from gitbook-plugin-mermaid-gb3
-        'page:before': function processMermaidBlockList(page) {
+        'page:before': async function processMermaidBlockList(page) {
             const mermaidRegex = /^```mermaid((.*[\r\n]+)+?)?```$/im;
             var match;
             while ((match = mermaidRegex.exec(page.content))) {
@@ -58,7 +58,7 @@ module.exports = {
                 var mermaidContent = match[1];
                 console.log(mermaidContent)
                 var processed = _string2svgAsync(mermaidContent);
-                // await processed;
+                await processed;
                 page.content = page.content.replace(rawBlock, processed);
             }
             return page;
