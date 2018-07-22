@@ -1,0 +1,19 @@
+{
+  "name": "gitbook-plugin-mermaid-cli",
+  "description": "Pipe wraper for mermaid.cli",
+  "main": "index.js",
+  "version": "1.0.3",
+  "engines": {
+    "gitbook": ">=3.0.0"
+  },
+  "homepage": "https://github.com/miao1007/gitbook-plugin-mermaid-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miao1007/gitbook-plugin-mermaid-cli.git"
+  },
+  "dependencies": {
+    "mermaid.cli": "^0.5.1",
+    "q": "1.1.2"
+  },
+  "license": "Apache 2"
+}
