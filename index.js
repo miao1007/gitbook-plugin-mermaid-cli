@@ -6,7 +6,7 @@ const Q = require('q');
 
 const binPath = path.join(__dirname, "../.bin/mmdc");
 
-function _string2svgSync(mmdString) {
+function _string2svgAsync(mmdString) {
     const deferred = Q.defer();
     const filename = 'foo' + crypto.randomBytes(4).readUInt32LE(0) + 'bar';
     const tmpFile = "/tmp/" + filename;
@@ -34,7 +34,7 @@ function _string2svgSync(mmdString) {
 }
 
 module.exports = {
-    string2svgSync: _string2svgSync,
+    string2svgAsync: _string2svgAsync,
     blocks: {
         mermaid: {
             process: function (block) {
@@ -45,23 +45,23 @@ module.exports = {
                     var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
                     body = readFileSync(absoluteSrcPath, 'utf8')
                 }
-                return _string2svgSync(body);
+                return _string2svgAsync(body);
             }
-        },
-        hooks: {
-            // from gitbook-plugin-mermaid-gb3
-            'page:before': async function processMermaidBlockList(page) {
-                const mermaidRegex = /^```mermaid((.*[\r\n]+)+?)?```$/im;
-                var match;
-                while ((match = mermaidRegex.exec(page.content))) {
-                    var rawBlock = match[0];
-                    var mermaidContent = match[1];
-                    var processed = _string2svgSync(mermaidContent);
-                    await processed;
-                    page.content = page.content.replace(rawBlock, processed);
-                }
-                return page;
+        }
+    }, hooks: {
+        // from gitbook-plugin-mermaid-gb3
+        'page:before': function processMermaidBlockList(page) {
+            const mermaidRegex = /^```mermaid((.*[\r\n]+)+?)?```$/im;
+            var match;
+            while ((match = mermaidRegex.exec(page.content))) {
+                var rawBlock = match[0];
+                var mermaidContent = match[1];
+                console.log(mermaidContent)
+                var processed = _string2svgAsync(mermaidContent);
+                // await processed;
+                page.content = page.content.replace(rawBlock, processed);
             }
+            return page;
         }
     }
 };
