@@ -37,11 +37,11 @@ module.exports = {
     blocks: {
         mermaid: {
             process: function (block) {
-                let body = block.body;
-                const src = block.kwargs.src;
+                var body = block.body;
+                var src = block.kwargs.src;
                 if (src) {
-                    const relativeSrcPath = url.resolve(this.ctx.file.path, src);
-                    const absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath));
+                    var relativeSrcPath = url.resolve(this.ctx.file.path, src)
+                    var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
                     body = fs.readFileSync(absoluteSrcPath, 'utf8')
                 }
                 return _string2svgAsync(body);
@@ -55,9 +55,7 @@ module.exports = {
             while ((match = mermaidRegex.exec(page.content))) {
                 var rawBlock = match[0];
                 var mermaidContent = match[1];
-                console.log(mermaidContent);
-                var processed =  _string2svgAsync(mermaidContent);
-                await processed;
+                const processed =  await _string2svgAsync(mermaidContent);
                 page.content = page.content.replace(rawBlock, processed);
             }
             return page;
