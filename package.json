@@ -12,8 +12,7 @@
     "url": "https://github.com/miao1007/gitbook-plugin-mermaid-cli.git"
   },
   "dependencies": {
-    "mermaid.cli": "^0.5.1",
-    "q": "1.1.2"
+    "mermaid.cli": "^0.5.1"
   },
   "license": "Apache 2"
 }
