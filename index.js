@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const binPath = path.join(__dirname, "../.bin/mmdc");
+const url = require('url');
 
 function _string2svgAsync(mmdString) {
     const filename = 'foo' + crypto.randomBytes(4).readUInt32LE(0) + 'bar';
@@ -36,12 +37,12 @@ module.exports = {
     blocks: {
         mermaid: {
             process: function (block) {
-                var body = block.body;
-                var src = block.kwargs.src;
+                let body = block.body;
+                const src = block.kwargs.src;
                 if (src) {
-                    var relativeSrcPath = url.resolve(this.ctx.file.path, src)
-                    var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
-                    body = readFileSync(absoluteSrcPath, 'utf8')
+                    const relativeSrcPath = url.resolve(this.ctx.file.path, src);
+                    const absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath));
+                    body = fs.readFileSync(absoluteSrcPath, 'utf8')
                 }
                 return _string2svgAsync(body);
             }
@@ -54,7 +55,7 @@ module.exports = {
             while ((match = mermaidRegex.exec(page.content))) {
                 var rawBlock = match[0];
                 var mermaidContent = match[1];
-                console.log(mermaidContent)
+                console.log(mermaidContent);
                 var processed =  _string2svgAsync(mermaidContent);
                 await processed;
                 page.content = page.content.replace(rawBlock, processed);
