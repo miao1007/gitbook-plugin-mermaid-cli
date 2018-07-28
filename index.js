@@ -21,11 +21,11 @@ function _string2svgAsync(mmdString) {
                     fs.unlinkSync(tmpFile);
                     reject(err || stderr)
                 } else {
-                    console.log(stdout);
                     const text = fs.readFileSync(tmpFile + '.svg', 'utf8');
                     fs.unlinkSync(tmpFile);
                     fs.unlinkSync(tmpFile + '.svg');
-                    resolve(text)
+                    var trim = text.trim();
+                    resolve("\n<!--mermaid-->\n<div>\n" + trim + "\n</div>\n<!--endmermaid-->\n\n")
                 }
             });
         });
@@ -55,7 +55,7 @@ module.exports = {
             while ((match = mermaidRegex.exec(page.content))) {
                 var rawBlock = match[0];
                 var mermaidContent = match[1];
-                const processed =  await _string2svgAsync(mermaidContent);
+                const processed =  "{% mermaid %}\n" +mermaidContent  + "{% endmermaid %}\n"
                 page.content = page.content.replace(rawBlock, processed);
             }
             return page;

@@ -2,7 +2,7 @@
   "name": "gitbook-plugin-mermaid-cli",
   "description": "Pipe wraper for mermaid.cli",
   "main": "index.js",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "engines": {
     "gitbook": ">=3.0.0"
   },

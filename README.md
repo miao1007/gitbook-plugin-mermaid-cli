@@ -5,6 +5,9 @@ String based pipeline wrapper for mermaid.cli.
 * No external css/js required.
 * Same usage API like gitbook-plugin-mermaid
 
+## Known issues
+* [Subgraphs](https://mermaidjs.github.io/flowchart.html) is not rendered on first view duo to xml errors, PR is welcomed.
+
 ## Install
 
 in the book.json:
