@@ -2,30 +2,41 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const binPath = path.join(__dirname, "../.bin/mmdc");
+const binPath = externalTool("mmdc");
 const url = require('url');
 
-function _string2svgAsync(mmdString) {
+function getTmp() {
     const filename = 'foo' + crypto.randomBytes(4).readUInt32LE(0) + 'bar';
-    const tmpFile = "/tmp/" + filename;
+    return "/tmp/" + filename;
+}
+
+function _string2svgAsync(mmdString) {
+    const tmpFile = getTmp();
     return new Promise((resolve, reject) => {
         fs.writeFile(tmpFile, mmdString, function (err) {
             if (err) {
                 return console.log(err);
             }
-            console.log("tmpFile =" + tmpFile);
-            childProcess.execFile(binPath, ['-i', tmpFile], function (err, stdout, stderr) {
+            // see https://github.com/mermaidjs/mermaid.cli#options
+            const args = [
+                '-i', tmpFile,
+                '-C', path.join(__dirname, 'mermaid.css'),
+                '-b', '#ffffff'
+            ];
+            childProcess.execFile(binPath, args, function (err, stdout, stderr) {
                 if (err || stderr) {
                     console.log("err=");
-                    console.log(err || stderr);
+                    console.log(stderr);
                     fs.unlinkSync(tmpFile);
-                    reject(err || stderr)
+                    reject(err || stdout)
                 } else {
                     const text = fs.readFileSync(tmpFile + '.svg', 'utf8');
                     fs.unlinkSync(tmpFile);
                     fs.unlinkSync(tmpFile + '.svg');
                     var trim = text.trim();
-                    resolve("\n<!--mermaid-->\n<div>\n" + trim + "\n</div>\n<!--endmermaid-->\n\n")
+                    var newPath = "data:image/svg+xml;base64," + new Buffer(trim).toString('base64');
+                    var img = "<img src='" + newPath + "'";
+                    resolve(img)
                 }
             });
         });
@@ -55,10 +66,26 @@ module.exports = {
             while ((match = mermaidRegex.exec(page.content))) {
                 var rawBlock = match[0];
                 var mermaidContent = match[1];
-                const processed =  "{% mermaid %}\n" +mermaidContent  + "{% endmermaid %}\n"
+                const processed = "{% mermaid %}\n" + mermaidContent + "{% endmermaid %}\n"
                 page.content = page.content.replace(rawBlock, processed);
             }
             return page;
         }
     }
 };
+
+// from https://github.com/raghur/mermaid-filter/blob/master/index.js
+function externalTool(command) {
+    return (function firstExisting(paths, error) {
+        for (var i = 0; i < paths.length; i++) {
+            if (fs.existsSync(paths[i])) return `${paths[i]}`;
+        }
+        error();
+    })([
+            path.resolve(__dirname, "node_modules", ".bin", command),
+            path.resolve(__dirname, "..", ".bin", command)],
+        function () {
+            console.error("External tool not found: " + command);
+            process.exit(1);
+        });
+}
