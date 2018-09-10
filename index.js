@@ -32,7 +32,7 @@ function _string2svgAsync(mmdString, chromeDir) {
                 '-C', path.join(__dirname, 'mermaid.css'),
                 '-b', '#ffffff',
                 // see https://github.com/GoogleChrome/puppeteer/blob/v1.8.0/docs/api.md#puppeteerlaunchoptions
-                '-c', json2File({
+                '-p', json2File({
                     "headless": true,
                     "executablePath": chromeDir
                 }, tmpFile + ".json")
@@ -48,9 +48,7 @@ function _string2svgAsync(mmdString, chromeDir) {
                     fs.unlinkSync(tmpFile);
                     fs.unlinkSync(tmpFile + '.svg');
                     fs.unlinkSync(tmpFile + '.json');
-                    var trim = text.trim();
-                    var newPath = "data:image/svg+xml;base64," + new Buffer(trim).toString('base64');
-                    var img = "<img src='" + newPath + "'>";
+                    var img = "<img src='data:image/svg+xml;base64," + new Buffer(text).toString('base64') + "'>";
                     resolve(img)
                 }
             });
