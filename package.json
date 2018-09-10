@@ -2,7 +2,7 @@
   "name": "gitbook-plugin-mermaid-cli",
   "description": "Pipe wraper for mermaid.cli",
   "main": "index.js",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "engines": {
     "gitbook": ">=3.0.0"
   },
@@ -13,6 +13,15 @@
   },
   "dependencies": {
     "mermaid.cli": "^0.5.1"
+  },
+  "gitbook": {
+    "properties": {
+      "chromeDir": {
+        "type": "string",
+        "default": "",
+        "description": "Chrome exec path(not null)"
+      }
+    }
   },
   "license": "Apache 2"
 }

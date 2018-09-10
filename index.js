@@ -10,7 +10,16 @@ function getTmp() {
     return "/tmp/" + filename;
 }
 
-function _string2svgAsync(mmdString) {
+function json2File(jsonObj, fileDir) {
+    fs.writeFile(fileDir, JSON.stringify(jsonObj, null, 2), function (err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+    return fileDir;
+}
+
+function _string2svgAsync(mmdString, chromeDir) {
     const tmpFile = getTmp();
     return new Promise((resolve, reject) => {
         fs.writeFile(tmpFile, mmdString, function (err) {
@@ -21,7 +30,12 @@ function _string2svgAsync(mmdString) {
             const args = [
                 '-i', tmpFile,
                 '-C', path.join(__dirname, 'mermaid.css'),
-                '-b', '#ffffff'
+                '-b', '#ffffff',
+                // see https://github.com/GoogleChrome/puppeteer/blob/v1.8.0/docs/api.md#puppeteerlaunchoptions
+                '-c', json2File({
+                    "headless": true,
+                    "executablePath": chromeDir
+                }, tmpFile + ".json")
             ];
             childProcess.execFile(binPath, args, function (err, stdout, stderr) {
                 if (err || stderr) {
@@ -33,9 +47,10 @@ function _string2svgAsync(mmdString) {
                     const text = fs.readFileSync(tmpFile + '.svg', 'utf8');
                     fs.unlinkSync(tmpFile);
                     fs.unlinkSync(tmpFile + '.svg');
+                    fs.unlinkSync(tmpFile + '.json');
                     var trim = text.trim();
                     var newPath = "data:image/svg+xml;base64," + new Buffer(trim).toString('base64');
-                    var img = "<img src='" + newPath + "'";
+                    var img = "<img src='" + newPath + "'>";
                     resolve(img)
                 }
             });
@@ -48,6 +63,7 @@ module.exports = {
     blocks: {
         mermaid: {
             process: function (block) {
+                var chromeDir = this.config.get('pluginsConfig.mermaid-cli.chromeDir');
                 var body = block.body;
                 var src = block.kwargs.src;
                 if (src) {
@@ -55,12 +71,12 @@ module.exports = {
                     var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
                     body = fs.readFileSync(absoluteSrcPath, 'utf8')
                 }
-                return _string2svgAsync(body);
+                return _string2svgAsync(body, chromeDir);
             }
         }
     }, hooks: {
         // from gitbook-plugin-mermaid-gb3
-        'page:before': async function processMermaidBlockList(page) {
+        'page:before': async function processMermaidBlockList(page, a) {
             const mermaidRegex = /^```mermaid((.*[\r\n]+)+?)?```$/im;
             var match;
             while ((match = mermaidRegex.exec(page.content))) {
