@@ -45,6 +45,8 @@ gitbook serve
 
 Now we can use a local Chrome Runtime without download the slowly large file from npm.
 
+> If "Error: spawn E2BIG", please run `gitbook install` twice.
+
 
 ### How to use it?
 > It's the same API as [JozoVilcek/piranna's gitbook-plugin-mermaid](https://github.com/piranna/gitbook-plugin-mermaid)
