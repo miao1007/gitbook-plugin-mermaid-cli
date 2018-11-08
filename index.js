@@ -19,23 +19,35 @@ function json2File(jsonObj, fileDir) {
     return fileDir;
 }
 
-function _string2svgAsync(mmdString, chromeDir) {
+/**
+ *
+ * @param {String}mmdString your mermaid string
+ * @param {String}chromeDir: chrome binary dir
+ * @param {Array<String>}chromeArgs: chrome args, see https://peter.sh/experiments/chromium-command-line-switches/
+ * @returns {Promise}
+ * @private
+ */
+function _string2svgAsync(mmdString, chromeDir, chromeArgs) {
     const tmpFile = getTmp();
     return new Promise((resolve, reject) => {
         fs.writeFile(tmpFile, mmdString, function (err) {
             if (err) {
                 return console.log(err);
             }
+            // see https://github.com/GoogleChrome/puppeteer/blob/v1.8.0/docs/api.md#puppeteerlaunchoptions
+            const puppeteerArgs = {
+                "headless": true,
+                "executablePath": chromeDir
+            };
+            if (chromeArgs) {
+                puppeteerArgs['args'] = chromeArgs;
+            }
             // see https://github.com/mermaidjs/mermaid.cli#options
             const args = [
                 '-i', tmpFile,
                 '-C', path.join(__dirname, 'mermaid.css'),
                 '-b', '#ffffff',
-                // see https://github.com/GoogleChrome/puppeteer/blob/v1.8.0/docs/api.md#puppeteerlaunchoptions
-                '-p', json2File({
-                    "headless": true,
-                    "executablePath": chromeDir
-                }, tmpFile + ".json")
+                '-p', json2File(puppeteerArgs, tmpFile + ".json")
             ];
             childProcess.execFile(binPath, args, function (err, stdout, stderr) {
                 if (err || stderr) {
@@ -48,7 +60,7 @@ function _string2svgAsync(mmdString, chromeDir) {
                     fs.unlinkSync(tmpFile);
                     fs.unlinkSync(tmpFile + '.svg');
                     fs.unlinkSync(tmpFile + '.json');
-                    var img = "<img src='data:image/svg+xml;base64," + new Buffer(text).toString('base64') + "'>";
+                    const img = "<img src='data:image/svg+xml;base64," + new Buffer(text).toString('base64') + "'>";
                     resolve(img)
                 }
             });
@@ -62,6 +74,7 @@ module.exports = {
         mermaid: {
             process: function (block) {
                 var chromeDir = this.config.get('pluginsConfig.mermaid-cli.chromeDir');
+                var chromeArgs = this.config.get('pluginsConfig.mermaid-cli.chromeArgs');
                 var body = block.body;
                 var src = block.kwargs.src;
                 if (src) {
@@ -69,7 +82,7 @@ module.exports = {
                     var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
                     body = fs.readFileSync(absoluteSrcPath, 'utf8')
                 }
-                return _string2svgAsync(body, chromeDir);
+                return _string2svgAsync(body, chromeDir, chromeArgs);
             }
         }
     }, hooks: {

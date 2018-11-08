@@ -2,7 +2,7 @@
   "name": "gitbook-plugin-mermaid-cli",
   "description": "Pipe wraper for mermaid.cli",
   "main": "index.js",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "engines": {
     "gitbook": ">=3.0.0"
   },
@@ -23,6 +23,11 @@
         "type": "string",
         "default": "",
         "description": "Chrome exec path(not null)"
+      },
+      "chromeArgs": {
+        "type": "array",
+        "default": "",
+        "description": "eg: [\"--no-sandbox\"], see full at http://peter.sh/experiments/chromium-command-line-switches/"
       }
     }
   },

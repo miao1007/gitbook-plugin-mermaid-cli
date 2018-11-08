@@ -15,7 +15,7 @@ Render flowcharts in markdown with mermaid.cli.
 
 
 ## Install
-mermaid.cli is based on puppeteer, which need to download a Chrome. to skip download a chrome
+puppeteer is a tool to control Chrome via javascript, and mermaid.cli is a wrapper for mermaid on the top of Chrome Runtime.The installation of puppeteer may be hard on private network, so I created a plugin to skip download the Chrome.
 
 in the book.json:
 
@@ -26,7 +26,8 @@ config your chrome exec file
   "plugins": ["mermaid-cli"],
   "pluginsConfig": {
     "mermaid-cli": {
-      "chromeDir": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      "chromeDir": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "chromeArgs": []
     },
   }
 }
@@ -45,7 +46,7 @@ gitbook serve
 
 Now we can use a local Chrome Runtime without download the slowly large file from npm.
 
-> If "Error: spawn E2BIG", please run `gitbook install` twice.
+> If "Error: spawn E2BIG", please run `gitbook install` again.
 
 
 ### How to use it?
