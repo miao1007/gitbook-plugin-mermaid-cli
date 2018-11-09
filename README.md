@@ -1,5 +1,9 @@
 Render flowcharts in markdown with mermaid.cli.
 
+[![version](https://img.shields.io/npm/v/gitbook-plugin-mermaid-cli.svg)](https://www.npmjs.com/package/gitbook-plugin-mermaid-cli)
+[![download](https://img.shields.io/npm/dm/gitbook-plugin-mermaid-cli.svg)](https://www.npmjs.com/package/gitbook-plugin-mermaid-cli)
+
+
 ## Features
 * Based on mermaid.cli/puppeteer, generate svg with base64 encode at compile time, no external css and js required.
 * Same API like gitbook-plugin-mermaid/Typora
