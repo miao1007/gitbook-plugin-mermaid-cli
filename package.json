@@ -14,6 +14,9 @@
   "dependencies": {
     "mermaid.cli": "^0.5.1"
   },
+  "devDependencies": {
+    "gitbook-tester": "1.4.2"
+  },
   "config": {
     "NPM_CONFIG_PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": true
   },
