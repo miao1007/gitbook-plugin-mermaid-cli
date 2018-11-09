@@ -1,13 +1,14 @@
 const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const crypto = require('crypto');
 const binPath = externalTool("mmdc");
 const url = require('url');
 
 function getTmp() {
-    const filename = 'foo' + crypto.randomBytes(4).readUInt32LE(0) + 'bar';
-    return "/tmp/" + filename;
+    const filename = 'mermaid' + crypto.randomBytes(4).readUInt32LE(0);
+    return path.join(os.tmpdir(), filename);
 }
 
 function json2File(jsonObj, fileDir) {
@@ -21,16 +22,39 @@ function json2File(jsonObj, fileDir) {
 
 /**
  *
+ * @param book: Global book
+ * @param svgFileDir: svgFileDir path
+ * @returns {string}
+ */
+function svg2img(book, svgFileDir) {
+    return new Promise((resolve, reject) => {
+        if (book.generator === 'ebook') {
+            // relevant path
+            var dest = path.basename(svgFileDir);
+            // Copy a file to the output folder
+            book.output.copyFile(svgFileDir, dest).then(function () {
+                resolve("<img src=\"" + dest + "\"/>");
+            });
+        } else {
+            const text = fs.readFileSync(svgFileDir, 'utf8');
+            resolve("<img src='data:image/svgFileDir+xml;base64," + new Buffer(text.trim()).toString('base64') + "'>");
+        }
+    })
+}
+
+/**
+ *
  * @param {String}mmdString your mermaid string
+ * @param book: book
  * @param {String}chromeDir: chrome binary dir
  * @param {Array<String>}chromeArgs: chrome args, see https://peter.sh/experiments/chromium-command-line-switches/
  * @returns {Promise}
  * @private
  */
-function _string2svgAsync(mmdString, chromeDir, chromeArgs) {
-    const tmpFile = getTmp();
+function _string2svgAsync(mmdString, book, chromeDir, chromeArgs) {
+    const strFile = getTmp();
     return new Promise((resolve, reject) => {
-        fs.writeFile(tmpFile, mmdString, function (err) {
+        fs.writeFile(strFile, mmdString, function (err) {
             if (err) {
                 return console.log(err);
             }
@@ -44,24 +68,25 @@ function _string2svgAsync(mmdString, chromeDir, chromeArgs) {
             }
             // see https://github.com/mermaidjs/mermaid.cli#options
             const args = [
-                '-i', tmpFile,
+                '-i', strFile,
                 '-C', path.join(__dirname, 'mermaid.css'),
                 '-b', '#ffffff',
-                '-p', json2File(puppeteerArgs, tmpFile + ".json")
+                '-p', json2File(puppeteerArgs, strFile + ".json")
             ];
             childProcess.execFile(binPath, args, function (err, stdout, stderr) {
                 if (err || stderr) {
                     console.log("err=");
                     console.log(stderr);
-                    fs.unlinkSync(tmpFile);
+                    fs.unlinkSync(strFile);
                     reject(err || stdout)
                 } else {
-                    const text = fs.readFileSync(tmpFile + '.svg', 'utf8');
-                    fs.unlinkSync(tmpFile);
-                    fs.unlinkSync(tmpFile + '.svg');
-                    fs.unlinkSync(tmpFile + '.json');
-                    const img = "<img src='data:image/svg+xml;base64," + new Buffer(text).toString('base64') + "'>";
-                    resolve(img)
+                    var svgFile = strFile + '.svg';
+                    svg2img(book, svgFile).then(function (img) {
+                        fs.unlinkSync(strFile);
+                        fs.unlinkSync(strFile + '.json');
+                        fs.unlinkSync(svgFile);
+                        resolve(img)
+                    });
                 }
             });
         });
@@ -69,7 +94,6 @@ function _string2svgAsync(mmdString, chromeDir, chromeArgs) {
 }
 
 module.exports = {
-    string2svgAsync: _string2svgAsync,
     blocks: {
         mermaid: {
             process: function (block) {
@@ -82,7 +106,7 @@ module.exports = {
                     var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
                     body = fs.readFileSync(absoluteSrcPath, 'utf8')
                 }
-                return _string2svgAsync(body, chromeDir, chromeArgs);
+                return _string2svgAsync(body, this, chromeDir, chromeArgs);
             }
         }
     }, hooks: {
