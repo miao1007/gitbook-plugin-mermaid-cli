@@ -11,12 +11,14 @@ function getTmp() {
     return path.join(os.tmpdir(), filename);
 }
 
+/**
+ * serialize the object to file as json
+ * @param jsonObj: the object to be serialised.
+ * @param fileDir: where the file to be write.
+ * @returns {*} the file
+ */
 function json2File(jsonObj, fileDir) {
-    fs.writeFile(fileDir, JSON.stringify(jsonObj, null, 2), function (err) {
-        if (err) {
-            console.log(err);
-        }
-    });
+    fs.writeFileSync(fileDir, JSON.stringify(jsonObj, null, 2));
     return fileDir;
 }
 
@@ -28,10 +30,9 @@ function json2File(jsonObj, fileDir) {
  */
 function svg2img(book, svgFileDir) {
     return new Promise((resolve, reject) => {
-        console.log(svgFileDir)
         if (book.generator === 'ebook') {
             // relevant path
-            var dest = path.basename(svgFileDir);
+            const dest = path.basename(svgFileDir);
             // Copy a file to the output folder
             book.output.copyFile(svgFileDir, dest).then(function () {
                 resolve("<img src=\"" + path.join('/' + dest) + "\"/>");
@@ -52,10 +53,10 @@ function svg2img(book, svgFileDir) {
  */
 function _string2svgAsync(mmdString, book) {
     const strFile = getTmp();
-    const chromeDir = this.config.get('pluginsConfig.mermaid-cli.chromeDir');
-    const chromeArgs = this.config.get('pluginsConfig.mermaid-cli.chromeArgs');
+    const chromeDir = book.config.get('pluginsConfig.mermaid-cli.chromeDir');
+    const chromeArgs = book.config.get('pluginsConfig.mermaid-cli.chromeArgs');
     // not implicated yet.
-    const mermaidArgs = this.config.get('pluginsConfig.mermaid-cli.mermaidArgs');
+    const mermaidArgs = book.config.get('pluginsConfig.mermaid-cli.mermaidArgs');
     return new Promise((resolve, reject) => {
         fs.writeFile(strFile, mmdString, function (err) {
             if (err) {
@@ -85,7 +86,7 @@ function _string2svgAsync(mmdString, book) {
                     fs.unlinkSync(strFile);
                     reject(err || stdout)
                 } else {
-                    var svgFile = strFile + format;
+                    const svgFile = strFile + format;
                     svg2img(book, svgFile).then(function (img) {
                         fs.unlinkSync(strFile);
                         fs.unlinkSync(strFile + '.json');
