@@ -47,13 +47,15 @@ function svg2img(book, svgFileDir) {
  *
  * @param {String}mmdString your mermaid string
  * @param book: book
- * @param {String}chromeDir: chrome binary dir
- * @param {Array<String>}chromeArgs: chrome args, see https://peter.sh/experiments/chromium-command-line-switches/
  * @returns {Promise}
  * @private
  */
-function _string2svgAsync(mmdString, book, chromeDir, chromeArgs) {
+function _string2svgAsync(mmdString, book) {
     const strFile = getTmp();
+    const chromeDir = this.config.get('pluginsConfig.mermaid-cli.chromeDir');
+    const chromeArgs = this.config.get('pluginsConfig.mermaid-cli.chromeArgs');
+    // not implicated yet.
+    const mermaidArgs = this.config.get('pluginsConfig.mermaid-cli.mermaidArgs');
     return new Promise((resolve, reject) => {
         fs.writeFile(strFile, mmdString, function (err) {
             if (err) {
@@ -100,8 +102,6 @@ module.exports = {
     blocks: {
         mermaid: {
             process: function (block) {
-                var chromeDir = this.config.get('pluginsConfig.mermaid-cli.chromeDir');
-                var chromeArgs = this.config.get('pluginsConfig.mermaid-cli.chromeArgs');
                 var body = block.body;
                 var src = block.kwargs.src;
                 if (src) {
@@ -109,7 +109,7 @@ module.exports = {
                     var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
                     body = fs.readFileSync(absoluteSrcPath, 'utf8')
                 }
-                return _string2svgAsync(body, this, chromeDir, chromeArgs);
+                return _string2svgAsync(body, this);
             }
         }
     }, hooks: {
