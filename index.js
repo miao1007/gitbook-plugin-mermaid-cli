@@ -28,12 +28,13 @@ function json2File(jsonObj, fileDir) {
  */
 function svg2img(book, svgFileDir) {
     return new Promise((resolve, reject) => {
+        console.log(svgFileDir)
         if (book.generator === 'ebook') {
             // relevant path
             var dest = path.basename(svgFileDir);
             // Copy a file to the output folder
             book.output.copyFile(svgFileDir, dest).then(function () {
-                resolve("<img src=\"" + dest + "\"/>");
+                resolve("<img src=\"" + path.join('/' + dest) + "\"/>");
             });
         } else {
             const text = fs.readFileSync(svgFileDir, 'utf8');
@@ -67,9 +68,11 @@ function _string2svgAsync(mmdString, book, chromeDir, chromeArgs) {
                 puppeteerArgs['args'] = chromeArgs;
             }
             // see https://github.com/mermaidjs/mermaid.cli#options
+            const format = '.' + (book.generator === 'ebook' ? "png" : "svg");
             const args = [
                 '-i', strFile,
                 '-C', path.join(__dirname, 'mermaid.css'),
+                '-o', strFile + format,
                 '-b', '#ffffff',
                 '-p', json2File(puppeteerArgs, strFile + ".json")
             ];
@@ -80,7 +83,7 @@ function _string2svgAsync(mmdString, book, chromeDir, chromeArgs) {
                     fs.unlinkSync(strFile);
                     reject(err || stdout)
                 } else {
-                    var svgFile = strFile + '.svg';
+                    var svgFile = strFile + format;
                     svg2img(book, svgFile).then(function (img) {
                         fs.unlinkSync(strFile);
                         fs.unlinkSync(strFile + '.json');
