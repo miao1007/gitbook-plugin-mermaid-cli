@@ -37,7 +37,7 @@ function svg2img(book, svgFileDir) {
             });
         } else {
             const text = fs.readFileSync(svgFileDir, 'utf8');
-            resolve("<img src='data:image/svgFileDir+xml;base64," + new Buffer(text.trim()).toString('base64') + "'>");
+            resolve("<img src='data:image/svg+xml;base64," + new Buffer(text.trim()).toString('base64') + "'>");
         }
     })
 }
