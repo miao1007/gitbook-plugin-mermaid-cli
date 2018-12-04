@@ -2,7 +2,7 @@
   "name": "gitbook-plugin-mermaid-cli",
   "description": "Pipe wraper for mermaid.cli",
   "main": "index.js",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "engines": {
     "gitbook": ">=3.0.0"
   },
@@ -16,6 +16,9 @@
   },
   "devDependencies": {
     "gitbook-tester": "1.4.2"
+  },
+  "scripts": {
+    "test": "node spec/simple.js"
   },
   "config": {
     "NPM_CONFIG_PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": true

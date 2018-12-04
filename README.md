@@ -7,7 +7,7 @@ Render flowcharts in markdown with mermaid.cli.
 ## Features
 * Based on mermaid.cli/puppeteer, generate svg with base64 encode at compile time, no external css and js required.
 * Same API like gitbook-plugin-mermaid/Typora
-* Support export as pdf
+* Support ebook(pdf/mobi/epub) exporting
 
 ## How Does it work
 
@@ -19,8 +19,13 @@ Render flowcharts in markdown with mermaid.cli.
 ```
 
 
+## Pre Installation
+Puppeteer is a tool to control Chrome via javascript, and mermaid.cli is a wrapper for mermaid on top of Chrome runtime.The installation of puppeteer may be hard on private network, so I created a plugin to skip download the Chrome.
+
+You need to install the Chrome anywhere(yum, brew, or install.exe). Chrome 68+ is preferred.
+If you're running on CentOS6, latest Chrome is [not supported](https://www.centos.org/forums/viewtopic.php?t=53768).
+
 ## Install
-puppeteer is a tool to control Chrome via javascript, and mermaid.cli is a wrapper for mermaid on the top of Chrome Runtime.The installation of puppeteer may be hard on private network, so I created a plugin to skip download the Chrome.
 
 in the book.json:
 
@@ -37,6 +42,9 @@ config your chrome exec file
   }
 }
 ```
+
+> If you are running as root, you may pass `"chromeArgs": ["--no-sandbox"]` to fix the error.
+> If you are running on Windows, make sure to add escape character like "C:\\xx\\xx.exe".
 
 then
 
