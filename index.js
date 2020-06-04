@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const binPath = externalTool("mmdc");
+const mermaidCli = require("./mmdc-fixed");
 const url = require('url');
 
 function getTmp() {
@@ -56,11 +56,11 @@ function _string2svgAsync(mmdString, book) {
     const chromeDir = book.config.get('pluginsConfig.mermaid-cli.chromeDir');
     const chromeArgs = book.config.get('pluginsConfig.mermaid-cli.chromeArgs');
     // not implicated yet.
-    const mermaidArgs = book.config.get('pluginsConfig.mermaid-cli.mermaidArgs');
     return new Promise((resolve, reject) => {
         fs.writeFile(strFile, mmdString, function (err) {
             if (err) {
-                return console.log(err);
+                console.log(err);
+                reject(err)
             }
             // see https://github.com/GoogleChrome/puppeteer/blob/v1.8.0/docs/api.md#puppeteerlaunchoptions
             const puppeteerArgs = {
@@ -72,29 +72,21 @@ function _string2svgAsync(mmdString, book) {
             }
             // see https://github.com/mermaidjs/mermaid.cli#options
             const format = '.' + (book.generator === 'ebook' ? "png" : "svg");
-            const args = [
-                '-i', strFile,
-                '-C', path.join(__dirname, 'mermaid.css'),
-                '-o', strFile + format,
-                '-b', '#ffffff',
-                '-p', json2File(puppeteerArgs, strFile + ".json")
-            ];
-            childProcess.execFile(binPath, args, function (err, stdout, stderr) {
-                if (err || stderr) {
-                    console.log("err=");
-                    console.log(stderr);
+            mermaidCli.runViaFunction({
+                'input': strFile,
+                'cssFile': path.join(__dirname, 'mermaid.css'),
+                'output': strFile + format,
+                'backgroundColor': '#ffffff',
+                'puppeteerConfigFile': json2File(puppeteerArgs, strFile + ".json")
+            },function (err, stdout, stderr) {
+                const svgFile = strFile + format;
+                svg2img(book, svgFile).then(function (img) {
                     fs.unlinkSync(strFile);
-                    reject(err || stdout)
-                } else {
-                    const svgFile = strFile + format;
-                    svg2img(book, svgFile).then(function (img) {
-                        fs.unlinkSync(strFile);
-                        fs.unlinkSync(strFile + '.json');
-                        fs.unlinkSync(svgFile);
-                        resolve(img)
-                    });
-                }
-            });
+                    fs.unlinkSync(strFile + '.json');
+                    fs.unlinkSync(svgFile);
+                    resolve(img)
+                });
+            })
         });
     })
 }
@@ -128,19 +120,3 @@ module.exports = {
         }
     }
 };
-
-// from https://github.com/raghur/mermaid-filter/blob/master/index.js
-function externalTool(command) {
-    return (function firstExisting(paths, error) {
-        for (var i = 0; i < paths.length; i++) {
-            if (fs.existsSync(paths[i])) return `${paths[i]}`;
-        }
-        error();
-    })([
-            path.resolve(__dirname, "node_modules", ".bin", command),
-            path.resolve(__dirname, "..", ".bin", command)],
-        function () {
-            console.error("External tool not found: " + command);
-            process.exit(1);
-        });
-}

@@ -31,6 +31,8 @@ in the book.json:
 
 config your chrome exec file
 
+On Mac/Linux
+
 ```json
 {
   "plugins": ["mermaid-cli"],
@@ -38,20 +40,38 @@ config your chrome exec file
     "mermaid-cli": {
       "chromeDir": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       "chromeArgs": []
-    },
+    }
+  }
+}
+```
+
+On Windows
+
+```json
+{
+  "plugins": ["mermaid-cli"],
+  "pluginsConfig": {
+    "mermaid-cli": {
+      "chromeDir": "C:\\xxx\\Google Chrome\\chrome.exe",
+      "chromeArgs": []
+    }
   }
 }
 ```
 
 > If you are running as root, you may pass `"chromeArgs": ["--no-sandbox"]` to fix the error.
-> If you are running on Windows, make sure to add escape character like "C:\\xx\\xx.exe".
+> If you are running on Windows, make sure to add escape character like `C:\\xx\\xx.exe`.
 
 then
 
 ```sh
 # see https://github.com/GoogleChrome/puppeteer/blob/v1.8.0/docs/api.md#environment-variables
+# on Mac/Linux
 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-# install plugin
+# on Windows(PowerShell)
+# $Env:PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+
+# then install plugin
 gitbook install
 # run the gitbook
 gitbook serve
